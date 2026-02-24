@@ -1,215 +1,196 @@
-import React from 'react';
-import { Calendar, Users, Clock, AlertTriangle, CheckCircle2, Activity, MapPin, FileText } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Calendar, Image as ImageIcon, CheckCircle2, AlertTriangle, Send, Loader2, User } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { getDailyFeeds, createDailyFeed, DailyFeed } from '../services/supabase';
 
 export const HomeTab: React.FC = () => {
+  const [feeds, setFeeds] = useState<DailyFeed[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [postContent, setPostContent] = useState('');
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetchFeeds();
+  }, []);
+
+  const fetchFeeds = async () => {
+    setLoading(true);
+    const data = await getDailyFeeds();
+    setFeeds(data);
+    setLoading(false);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Convert to Base64
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImagePreview(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = async () => {
+    if (!postContent.trim() && !imagePreview) return;
+
+    setIsSubmitting(true);
+    const success = await createDailyFeed(postContent, imagePreview || undefined);
+
+    if (success) {
+      setPostContent('');
+      setImagePreview(null);
+      await fetchFeeds();
+    }
+    setIsSubmitting(false);
+  };
+
   return (
-    <div className="log-page">
-      {/* Header Section */}
-      <div className="log-header">
-        <div className="log-header__meta w-full">
-          <div className="flex justify-between items-start">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="tag tag--amber">Medium Outage</span>
-                <span className="tag tag--muted">Unit 2</span>
+    <div className="pb-24 w-full flex flex-col items-center">
+
+      {/* ── Magazine Header ─────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full text-center mb-16 relative"
+      >
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-emerald-500/10 blur-[120px] pointer-events-none rounded-full" />
+
+        <div className="relative z-10 space-y-4">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <span className="px-4 py-1.5 text-xs font-bold tracking-widest uppercase text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-full">Unit 2 B Inspection</span>
+            <span className="px-4 py-1.5 text-xs font-bold tracking-widest uppercase text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-full">Medium Outage</span>
+          </div>
+          <h2 className="text-5xl lg:text-7xl font-black tracking-tighter text-white font-outfit dropshadow-2xl">
+            DAILY <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">FEEDS</span>
+          </h2>
+          <p className="text-slate-400 text-lg max-w-2xl mx-auto font-medium">
+            Real-time engineering intelligence, visual diagnostics, and outage progression logs from the GNPD floor.
+          </p>
+        </div>
+      </motion.div>
+
+      {/* ── Main Content Area (Max width constraints for reading) ── */}
+      <div className="w-full max-w-4xl space-y-12">
+
+        {/* ── Post Composer ──────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="panel-glass rounded-[2rem] p-2"
+        >
+          <div className="bg-slate-950/50 rounded-3xl p-6 border border-white/5">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/20">
+                <User size={20} className="text-white" />
               </div>
-              <h2 className="log-title text-2xl mb-1">GN Power Dinginin — Daily Outage Report</h2>
-              <div className="log-date flex items-center gap-4 text-[var(--text-secondary)]">
-                <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> 22 February 2026</span>
-                <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> Day 0</span>
-                <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> Mariveles</span>
+              <textarea
+                className="w-full bg-transparent border-none focus:ring-0 text-slate-200 resize-none min-h-[100px] text-lg font-medium placeholder:text-slate-600 outline-none"
+                placeholder="Log new observations, diagnostics, or outage updates..."
+                value={postContent}
+                onChange={(e) => setPostContent(e.target.value)}
+              />
+            </div>
+
+            <AnimatePresence>
+              {imagePreview && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="relative mb-6 ml-14 rounded-2xl overflow-hidden border border-white/10"
+                >
+                  <img src={imagePreview} alt="Preview" className="w-full h-auto max-h-[400px] object-cover" />
+                  <button
+                    onClick={() => setImagePreview(null)}
+                    className="absolute top-4 right-4 w-8 h-8 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-rose-500 transition-colors"
+                  >
+                    ×
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="flex items-center justify-between ml-14 pt-4 border-t border-white/5">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors font-medium text-sm"
+              >
+                <ImageIcon size={18} /> Add Media
+                <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageChange} />
+              </button>
+
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting || (!postContent.trim() && !imagePreview)}
+                className="btn btn--primary px-6 py-2 rounded-xl font-bold flex items-center gap-2 group disabled:opacity-50 disabled:pointer-events-none"
+              >
+                {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <><Send size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /> Publish Feed</>}
+              </button>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── Feed Stream ────────────────────────── */}
+        <div className="space-y-8">
+          {loading ? (
+            <div className="flex justify-center p-12">
+              <Loader2 size={32} className="text-emerald-500 animate-spin" />
+            </div>
+          ) : feeds.length > 0 ? (
+            feeds.map((feed, idx) => (
+              <motion.article
+                key={feed.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * Math.min(idx, 5) }}
+                className="panel-glass rounded-[2.5rem] p-8 relative overflow-hidden group hover:border-emerald-500/30 transition-colors duration-500"
+              >
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center shadow-inner">
+                      <User size={20} className="text-slate-400 group-hover:text-emerald-400 transition-colors" />
+                    </div>
+                    <div>
+                      <h4 className="text-white font-bold">{feed.author}</h4>
+                      <div className="flex items-center gap-2 text-xs font-medium text-slate-500 uppercase tracking-widest mt-1">
+                        <Calendar size={12} />
+                        {new Date(feed.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                        <span className="mx-1">•</span>
+                        {new Date(feed.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {feed.image_base64 && (
+                  <div className="mb-8 -mx-8 sm:mx-0 sm:rounded-2xl overflow-hidden border-y sm:border-x border-white/5 relative group/img">
+                    <div className="absolute inset-0 bg-black/20 group-hover/img:bg-black/0 transition-colors duration-500 z-10" />
+                    <img src={feed.image_base64} alt="Feed Attachment" className="w-full h-auto max-h-[600px] object-cover transform group-hover/img:scale-[1.02] transition-transform duration-700" />
+                  </div>
+                )}
+
+                <div className="prose prose-invert prose-lg max-w-none text-slate-300">
+                  {feed.content.split('\n').map((paragraph, i) => (
+                    <p key={i} className="leading-relaxed">{paragraph}</p>
+                  ))}
+                </div>
+              </motion.article>
+            ))
+          ) : (
+            <div className="text-center p-12 panel-glass rounded-3xl">
+              <div className="w-16 h-16 bg-white/5 rounded-full flex flex-col items-center justify-center mx-auto mb-4 border border-white/10 text-slate-500">
+                <ImageIcon size={24} />
               </div>
+              <h3 className="text-lg font-bold text-white mb-2">No feeds yet</h3>
+              <p className="text-slate-400">Initialize the database or create the first post.</p>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-[var(--text-secondary)]">NMES FSE DS: Ralf Klug / Jacques Erasmus</div>
-              <div className="text-sm text-[var(--text-secondary)]">NMES FSE NS: Kenny Cartwright / Anthony Ponce</div>
-            </div>
-          </div>
+          )}
         </div>
-      </div>
-
-      {/* KPI Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="p-4 rounded-lg border border-[var(--border)] bg-[var(--surface)]">
-          <div className="text-xs text-[var(--text-secondary)] uppercase tracking-wider mb-1">NMES Personnel</div>
-          <div className="text-2xl font-bold flex items-center gap-2">
-            <Users className="w-5 h-5 text-[var(--accent)]" /> 12
-          </div>
-        </div>
-        <div className="p-4 rounded-lg border border-[var(--border)] bg-[var(--surface)]">
-          <div className="text-xs text-[var(--text-secondary)] uppercase tracking-wider mb-1">PZ Personnel</div>
-          <div className="text-2xl font-bold flex items-center gap-2">
-            <Users className="w-5 h-5 text-[var(--text-dim)]" /> 35
-          </div>
-        </div>
-        <div className="p-4 rounded-lg border border-[var(--border)] bg-[var(--surface)]">
-          <div className="text-xs text-[var(--text-secondary)] uppercase tracking-wider mb-1">Planned Start</div>
-          <div className="text-lg font-mono font-bold">23/02/2026</div>
-        </div>
-        <div className="p-4 rounded-lg border border-[var(--border)] bg-[var(--surface)]">
-          <div className="text-xs text-[var(--text-secondary)] uppercase tracking-wider mb-1">Planned End</div>
-          <div className="text-lg font-mono font-bold">25/03/2026</div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Left Column: Critical Info */}
-        <div className="lg:col-span-2 space-y-6">
-          
-          {/* Comments */}
-          <div className="log-section">
-            <div className="log-section__title flex items-center gap-2">
-              <FileText className="w-4 h-4" /> Comments
-            </div>
-            <ul className="space-y-3 text-sm text-[var(--text)]">
-              <li className="flex gap-3">
-                <span className="text-[var(--accent)]">•</span>
-                <span>Inspect ITH gear. Validity sticker on ITH pump showed expiry date Jan 2026. According to GNPD, the ITH equipment is valid and current with certifications. Will fix the sticker issue – <span className="font-bold text-[var(--accent)]">IN PROGRESS</span>.</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-[var(--accent)]">•</span>
-                <span>Inspect special tools. The lifting beam certificate is pending from Plant – <span className="font-bold text-[var(--accent)]">IN PROGRESS</span>.</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Delay Tracker */}
-          <div className="log-section">
-            <div className="log-section__title flex items-center gap-2 text-[var(--danger)]">
-              <AlertTriangle className="w-4 h-4" /> Delay Tracker
-            </div>
-            <ul className="space-y-3 text-sm text-[var(--text)]">
-              <li className="flex gap-3">
-                <span className="text-[var(--danger)]">•</span>
-                <span>PTW for turbine scope and valve scope is expected to be received on 23/02/2026 00:00H. Cr (VI) decontamination may affect the schedule.</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-[var(--danger)]">•</span>
-                <span>Valve stroking activity is postponed to 23/02/2026, as for not to interrupt with forced air cooling, and also to ensure Cr (VI) decontamination completed.</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Steam Turbine Scope */}
-          <div className="log-section">
-            <div className="log-section__title flex items-center gap-2">
-              <Activity className="w-4 h-4" /> Steam Turbine Scope
-            </div>
-            <ul className="space-y-2 text-sm text-[var(--text)]">
-              <li className="flex justify-between items-start border-b border-[var(--border)] pb-2">
-                <span>Inspect lifting gear</span>
-                <span className="tag tag--amber">In Progress</span>
-              </li>
-              <li className="flex justify-between items-start border-b border-[var(--border)] pb-2">
-                <span>3rd office container lifted to turbine deck. Power supply connected</span>
-                <span className="tag tag--success">Completed</span>
-              </li>
-              <li className="flex justify-between items-start border-b border-[var(--border)] pb-2">
-                <span>Toolbox talk with all PZ person regarding Cr6</span>
-                <span className="tag tag--success">DONE</span>
-              </li>
-              <li className="flex justify-between items-start border-b border-[var(--border)] pb-2">
-                <span>Decontamination briefing for Insulators/Scaffolders (Entry/Exit/Disposal)</span>
-                <span className="tag tag--success">DONE</span>
-              </li>
-              <li className="flex justify-between items-start border-b border-[var(--border)] pb-2">
-                <span>Insulators open more insulation on valves</span>
-                <span className="tag tag--success">DONE</span>
-              </li>
-              <li className="flex justify-between items-start border-b border-[var(--border)] pb-2">
-                <span>Scaffolders to build scaffold on LHS at valves</span>
-                <span className="tag tag--amber">ONGOING</span>
-              </li>
-              <li className="flex justify-between items-start border-b border-[var(--border)] pb-2">
-                <span>Cr6 consumables cleared and come to site</span>
-                <span className="tag tag--success">RECEIVED</span>
-              </li>
-              <li className="flex justify-between items-start border-b border-[var(--border)] pb-2">
-                <span>Take temp readings on all valves (IP high on L/R, HP OK)</span>
-                <span className="tag tag--success">DONE</span>
-              </li>
-              <li className="flex justify-between items-start border-b border-[var(--border)] pb-2">
-                <span>Remove insulation on inspection holes (HP Done, IP Remaining)</span>
-                <span className="tag tag--amber">ONGOING</span>
-              </li>
-              <li className="flex justify-between items-start border-b border-[var(--border)] pb-2">
-                <span>Insulation removal on expansion joints for X-over pipes</span>
-                <span className="tag tag--amber">ONGOING</span>
-              </li>
-              <li className="flex justify-between items-start">
-                <span>Decontamination on HP CV and SV (Left & Right)</span>
-                <span className="tag tag--amber">ONGOING</span>
-              </li>
-            </ul>
-          </div>
-
-        </div>
-
-        {/* Right Column: Other Scopes */}
-        <div className="space-y-6">
-          
-          {/* HSE */}
-          <div className="p-4 rounded-lg bg-[var(--surface)] border border-[var(--border)]">
-            <div className="text-xs font-bold text-[var(--success)] uppercase tracking-widest mb-3 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4" /> HSE
-            </div>
-            <p className="text-sm text-[var(--text)]">
-              Toolbox talk: How to treat Cr6 contaminated area and the use of PPE.
-            </p>
-          </div>
-
-          {/* Offsite Machining */}
-          <div className="log-section">
-            <div className="log-section__title">Offsite Machining</div>
-            <ul className="space-y-3 text-sm text-[var(--text)]">
-              <li className="pl-3 border-l-2 border-[var(--accent)]">
-                <div className="font-bold text-xs uppercase text-[var(--text-secondary)] mb-1">MSV Seal Ring</div>
-                Pre machining. 1 x MCV seal ring turned, bored, 48-degree angle & parted off.
-              </li>
-              <li className="pl-3 border-l-2 border-[var(--accent)]">
-                <div className="font-bold text-xs uppercase text-[var(--text-secondary)] mb-1">MCV Seal Ring</div>
-                Pre machining. 1 x MSV seal ring turned, bored, 48-degree angle & parted off.
-              </li>
-              <li className="pl-3 border-l-2 border-[var(--accent)]">
-                <div className="font-bold text-xs uppercase text-[var(--text-secondary)] mb-1">OLV Seal Ring</div>
-                Pre machining. 1 x OLV seal ring turned & bored.
-              </li>
-            </ul>
-          </div>
-
-          {/* Generator */}
-          <div className="log-section">
-            <div className="log-section__title">Generator Scope</div>
-            <ul className="space-y-2 text-sm text-[var(--text)]">
-              <li className="flex justify-between items-start border-b border-[var(--border)] pb-2">
-                <span>Prep of Vacuum Pump Machine</span>
-                <span className="tag tag--amber">ONGOING</span>
-              </li>
-              <li className="flex justify-between items-start border-b border-[var(--border)] pb-2">
-                <span>H2 De-gassing</span>
-                <span className="tag tag--success">COMPLETED</span>
-              </li>
-              <li className="flex justify-between items-start border-b border-[var(--border)] pb-2">
-                <span>CO2 purging & air filling</span>
-                <span className="tag tag--success">COMPLETED</span>
-              </li>
-              <li className="flex justify-between items-start border-b border-[var(--border)] pb-2">
-                <span>Generator leak testing (24 hrs)</span>
-                <span className="tag tag--amber">ONGOING</span>
-              </li>
-              <li className="flex justify-between items-start">
-                <span>Scaffolding erection</span>
-                <span className="tag tag--amber">ONGOING</span>
-              </li>
-            </ul>
-          </div>
-
-        </div>
-      </div>
-
-      <div style={{ marginTop: '28px', padding: '16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', fontSize: '12px', color: 'var(--text-dim)' }}>
-        Generated from Daily Outage Report · NMES/OPN/SPNOMAC | Internal -001/FM-001 Rev. 01
       </div>
     </div>
   );

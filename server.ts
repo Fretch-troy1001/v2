@@ -20,24 +20,24 @@ async function startServer() {
         valve: valve || "",
         asFoundDimension: asFoundDimension || "",
       });
-      
+
       // The webhook URL
-      const webhookUrl = `https://troy-n8n-2026.duckdns.org/webhook-test/7c3dafe5-6f48-42f3-b2b6-bbe39aae3b12?${params.toString()}`;
-      
+      const webhookUrl = `https://troy-n8n-2026.duckdns.org/webhook/7c3dafe5-6f48-42f3-b2b6-bbe39aae3b12?${params.toString()}`;
+
       const response = await fetch(webhookUrl, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
-  
+
       const responseText = await response.text();
-  
+
       if (response.ok) {
         res.json({ success: true, data: responseText });
       } else {
-        res.status(response.status).json({ 
-          success: false, 
-          error: "Webhook failed", 
-          details: responseText 
+        res.status(response.status).json({
+          success: false,
+          error: "Webhook failed",
+          details: responseText
         });
       }
     } catch (error) {
@@ -54,24 +54,24 @@ async function startServer() {
         planeB: planeB || "",
         planeC: planeC || "",
       });
-      
+
       // The webhook URL for Valve Lock Weld
-      const webhookUrl = `https://troy-n8n-2026.duckdns.org/webhook-test/PlaneAandB?${params.toString()}`;
-      
+      const webhookUrl = `https://troy-n8n-2026.duckdns.org/webhook/PlaneAandB?${params.toString()}`;
+
       const response = await fetch(webhookUrl, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
-  
+
       const responseText = await response.text();
-  
+
       if (response.ok) {
         res.json({ success: true, data: responseText });
       } else {
-        res.status(response.status).json({ 
-          success: false, 
-          error: "Webhook failed", 
-          details: responseText 
+        res.status(response.status).json({
+          success: false,
+          error: "Webhook failed",
+          details: responseText
         });
       }
     } catch (error) {
@@ -88,24 +88,24 @@ async function startServer() {
         valveLockOd: valveLockOd || "",
         roughWeldingThickness: roughWeldingThickness || "",
       });
-      
+
       // The webhook URL for ICV Clamping Ring
-      const webhookUrl = `https://troy-n8n-2026.duckdns.org/webhook-test/clamping_ring?${params.toString()}`;
-      
+      const webhookUrl = `https://troy-n8n-2026.duckdns.org/webhook/clamping_ring?${params.toString()}`;
+
       const response = await fetch(webhookUrl, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
-  
+
       const responseText = await response.text();
-  
+
       if (response.ok) {
         res.json({ success: true, data: responseText });
       } else {
-        res.status(response.status).json({ 
-          success: false, 
-          error: "Webhook failed", 
-          details: responseText 
+        res.status(response.status).json({
+          success: false,
+          error: "Webhook failed",
+          details: responseText
         });
       }
     } catch (error) {
