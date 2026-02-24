@@ -1,0 +1,66 @@
+# Interaction Logs
+
+## 2026-02-23
+- **User Request**: "hi i have a project in github, how to import here?"
+- **Action**: Explained the manual migration process and requested the repository URL or source code. Initialized `blueprint.md` and `logs.md`.
+- **Update**: User provided full source code for "GNPD Turbine Dashboard".
+- **Action**: Started migration to React + TypeScript.
+- **Update**: User requested "Deep Navy & Success Green" styling.
+- **Action**: Updated `src/index.css` with new color palette, typography, and component styles.
+- **Update**: User requested integration of "Valve Dimension Entry" tool with backend proxy.
+- **Action**:
+  - Installed dependencies (`lucide-react`, `@radix-ui`, `express`, `tsx`).
+  - Created `src/lib/utils.ts` and UI components (`input`, `label`, `dialog`, `valve-form`).
+  - Created `server.ts` to handle webhook proxy.
+  - Updated `package.json` to run custom server.
+  - Added `ValveForm` to `ToolsTab`.
+- **Update**: User requested replacement of "Bearing Clearance Calculator" with "Bearing Position Check Calculator" using provided HTML logic.
+- **Action**:
+  - Created `src/components/tools/bearing-position-calculator.tsx` implementing the full logic (offset calc, SVG diagram, repeatability).
+  - Updated `ToolsTab.tsx` to include the new tool.
+- **Update**: User requested diagram style change: remove orange vector, add red dot at shell center with dotted lines to axes.
+- **Action**: Updated `src/components/tools/bearing-position-calculator.tsx` SVG rendering logic.
+- **Update**: User requested integration of "ISO 286 Tolerance Calculator" from existing HTML/JS logic, matching the app's light theme.
+- **Action**:
+  - Created `src/components/tools/iso-tolerance-calculator.tsx` porting the logic and data.
+  - Updated `ToolsTab.tsx` to include the new tool.
+- **Update**: User requested changes to "Valve Dimension Entry":
+  - Rename to "Seal Ring OD Calculator".
+  - Change "Valve Identifier" input to dropdown (MSV, MCV, OCV, ICV, ISV).
+  - Move form into a modal triggered by an "Open Tool" button.
+- **Action**:
+  - Refactored `src/components/ui/valve-form.tsx` to `SealRingCalculator` with card trigger and modal form.
+  - Updated `ToolsTab.tsx` to use the new component.
+- **Update**: User requested update of "Outage Log" (HomeTab) with data from a provided PDF report.
+- **Action**:
+  - Updated `src/components/HomeTab.tsx` with new data (Personnel, Dates, Comments, Delays, Work Scopes) and improved styling using a grid layout and Lucide icons.
+- **Update**: User requested a duplicate of "Seal Ring OD Calculator" named "Valve Lock Weld Build up and machining final Dimension Calculator".
+  - Webhook: `https://troy-n8n-2026.duckdns.org/webhook-test/PlaneAandB`
+  - Fields: Valve Identifier (dropdown), Plane B (text), Plane C (text).
+- **Action**:
+  - Created `src/components/tools/valve-lock-weld-calculator.tsx`.
+  - Added `/api/submit-valve-lock-weld` proxy route in `server.ts`.
+  - Updated `ToolsTab.tsx` to include the new tool.
+- **Update**: User requested UI refinements via screenshot:
+  - Rename dialog title of "Valve Lock Weld Calculator" to "Valve lock Final Machine Dimension".
+  - Remove placeholder cards ("Steam Flow Estimator", "Outage Duration Estimator") and "Workflow Connectors" section ("Report Generator", "Finding Notification").
+- **Action**:
+  - Updated `src/components/tools/valve-lock-weld-calculator.tsx` with new title.
+  - Updated `src/components/ToolsTab.tsx` to remove cards and section, and updated tool count.
+- **Update**: User requested a correction to the "Bearing Position Check" calculator logic and visualization.
+  - Renamed to "Rotor Position Calculator".
+  - Changed reference frame: Shell is now fixed, Rotor moves.
+  - Updated diagram: Axes on Shell, Red Dot on Rotor.
+  - Confirmed sign convention: Rotor Right (+), Rotor Up (+).
+- **Action**:
+  - Updated `src/components/tools/bearing-position-calculator.tsx` to implement fixed-shell/moving-rotor logic and updated UI text.
+- **Update**: User pointed out that the H-Move arrow direction was inverted (showing correction direction instead of displacement direction).
+- **Action**:
+  - Updated `src/components/tools/bearing-position-calculator.tsx` to make the H-Move arrow point in the direction of the offset (Positive=Right, Negative=Left).
+- **Update**: User requested a duplicate of "Seal Ring OD Calculator" named "ICV Clamping Ring Final Dimensions Calculator".
+  - Webhook: `https://troy-n8n-2026.duckdns.org/webhook-test/clamping_ring`
+  - Fields: Casing ID (Plane M), ValveLock OD (Plane G), Rough Welding Thickness (default 4.00).
+- **Action**:
+  - Created `src/components/tools/icv-clamping-ring-calculator.tsx`.
+  - Added `/api/submit-icv-clamping-ring` proxy route in `server.ts`.
+  - Updated `ToolsTab.tsx` to include the new tool.

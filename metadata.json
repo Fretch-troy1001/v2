@@ -1,0 +1,5 @@
+{
+  "name": "Nexus UI Template",
+  "description": "A clean, responsive React/Tailwind CSS dashboard template based on the Nexus architecture, featuring a modern dark sidebar and high-whitespace workspace.",
+  "requestFramePermissions": []
+}
