@@ -11,3 +11,6 @@ CREATE TABLE IF NOT EXISTS daily_feeds (
 -- and not using Supabase Storage, we don't need to configure RLS storage policies.
 -- Let's ensure RLS is disabled on the table to make it easy for our app to read/write using anon key.
 ALTER TABLE daily_feeds DISABLE ROW LEVEL SECURITY;
+
+-- Add image_url column for Supabase Storage support
+ALTER TABLE daily_feeds ADD COLUMN IF NOT EXISTS image_url TEXT;

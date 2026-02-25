@@ -150,6 +150,7 @@ export interface DailyFeed {
   id: string;
   content: string;
   image_base64: string | null;
+  image_url: string | null;
   author: string;
   created_at: string;
 }
@@ -169,12 +170,46 @@ export async function getDailyFeeds(): Promise<DailyFeed[]> {
   }
 }
 
-export async function createDailyFeed(content: string, imageBase64?: string): Promise<boolean> {
+/**
+ * Upload an image to Supabase Storage
+ */
+export async function uploadFeedImage(file: File): Promise<string | null> {
   try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+    const filePath = `feed-images/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('feed-images') // Assumes bucket exists as per implementation plan
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('feed-images')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  } catch (err) {
+    console.error('[Supabase uploadFeedImage]', err);
+    return null;
+  }
+}
+
+export async function createDailyFeed(content: string, imageBase64?: string, imageUrl?: string): Promise<boolean> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const author = session?.user?.email || 'Guest Engineer';
+
     const { error } = await supabase
       .from('daily_feeds')
       .insert([
-        { content, image_base64: imageBase64 || null, author: 'Turbine Engineer' }
+        {
+          content,
+          image_base64: imageBase64 || null,
+          image_url: imageUrl || null,
+          author
+        }
       ]);
 
     if (error) throw error;
@@ -184,3 +219,4 @@ export async function createDailyFeed(content: string, imageBase64?: string): Pr
     return false;
   }
 }
+
