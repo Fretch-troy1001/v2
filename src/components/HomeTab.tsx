@@ -90,9 +90,9 @@ export const HomeTab: React.FC = () => {
 
       {/* ── Magazine Header ─────────────────────────── */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full text-center mb-16 relative"
+        className="w-full text-center mb-8 relative"
       >
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-emerald-500/10 blur-[120px] pointer-events-none rounded-full" />
 
@@ -107,11 +107,11 @@ export const HomeTab: React.FC = () => {
               <Loader2 size={12} className="animate-pulse" /> Sync AI Report
             </button>
           </div>
-          <h2 className="text-5xl lg:text-7xl font-black tracking-tighter text-white font-outfit dropshadow-2xl">
-            DAILY <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">FEEDS</span>
+          <h2 className="text-4xl lg:text-5xl font-black tracking-tighter text-white font-outfit">
+            ENGINEERING <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">LOG</span>
           </h2>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto font-medium">
-            Real-time engineering intelligence, visual diagnostics, and outage progression logs from the GNPD floor.
+          <p className="text-slate-500 text-sm max-w-xl mx-auto font-medium uppercase tracking-[0.2em]">
+            Real-time visual diagnostics & outage progression
           </p>
         </div>
       </motion.div>
@@ -124,15 +124,15 @@ export const HomeTab: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="panel-glass rounded-[2rem] p-2"
+          className="panel-glass rounded-[2rem] p-1 group/composer hover:border-emerald-500/40 transition-all duration-500 shadow-2xl shadow-emerald-500/5"
         >
-          <div className="bg-slate-950/50 rounded-3xl p-6 border border-white/5">
+          <div className="bg-slate-950/80 rounded-3xl p-6 border border-white/5 group-focus-within/composer:border-emerald-500/30 transition-colors">
             <div className="flex items-start gap-4 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/20">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/20 group-hover/composer:scale-110 transition-transform">
                 <User size={20} className="text-white" />
               </div>
               <textarea
-                className="w-full bg-transparent border-none focus:ring-0 text-slate-200 resize-none min-h-[100px] text-lg font-medium placeholder:text-slate-600 outline-none"
+                className="w-full bg-transparent border-none focus:ring-0 text-slate-200 resize-none min-h-[100px] text-lg font-medium placeholder:text-slate-700 outline-none"
                 placeholder="Log new observations, diagnostics, or outage updates..."
                 value={postContent}
                 onChange={(e) => setPostContent(e.target.value)}
