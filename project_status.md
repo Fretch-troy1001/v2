@@ -13,7 +13,10 @@
     *   Upgrade global styling to a premium, glassmorphic layout (GNPD brand colors, blurs, and structured gradients).
     *   Replace legacy dashboards with the **Daily Feeds** system.
     *   Enable users to post field updates with inline image rendering to Supabase.
-*   **Phase 4: Agentic AI Integration & Expansion (Up Next)**
+*   **Phase 4: Migration & Documentation (Completed)**
+    *   Create comprehensive project documentation (architecture, changelog, status, feature reference).
+    *   Migrate the entire codebase to a new GitHub repository: **v2**.
+*   **Phase 5: Agentic AI Integration & Expansion (Up Next)**
     *   Finalize AI ingestion of turbine reports (NotebookLM MCP) for automated feed generation.
     *   User Authentication & Access Control via Supabase Auth (Engineering-only permissions).
     *   Expand hardware diagrams beyond ICV/MCV to specific Generator or Boiler overviews.
