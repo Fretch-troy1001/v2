@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, Image as ImageIcon, CheckCircle2, AlertTriangle, Send, Loader2, User, Trash2 } from 'lucide-react';
+import { Calendar, Image as ImageIcon, CheckCircle2, AlertTriangle, Send, Loader2, User, Trash2, Plus, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { getDailyFeeds, createDailyFeed, uploadFeedImage, deleteDailyFeed, DailyFeed } from '../services/supabase';
 
@@ -9,6 +9,7 @@ export const HomeTab: React.FC = () => {
   const [postContent, setPostContent] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isComposerOpen, setIsComposerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -62,6 +63,7 @@ export const HomeTab: React.FC = () => {
       setPostContent('');
       setImagePreview(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
+      setIsComposerOpen(false);
       await fetchFeeds();
     }
     setIsSubmitting(false);
@@ -119,64 +121,102 @@ export const HomeTab: React.FC = () => {
       {/* ── Main Content Area (Max width constraints for reading) ── */}
       <div className="w-full max-w-4xl space-y-12">
 
-        {/* ── Post Composer ──────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="panel-glass rounded-[2rem] p-1 group/composer hover:border-emerald-500/40 transition-all duration-500 shadow-2xl shadow-emerald-500/5"
-        >
-          <div className="bg-slate-950/80 rounded-3xl p-6 border border-white/5 group-focus-within/composer:border-emerald-500/30 transition-colors">
-            <div className="flex items-start gap-4 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/20 group-hover/composer:scale-110 transition-transform">
-                <User size={20} className="text-white" />
-              </div>
-              <textarea
-                className="w-full bg-transparent border-none focus:ring-0 text-slate-200 resize-none min-h-[100px] text-lg font-medium placeholder:text-slate-700 outline-none"
-                placeholder="Log new observations, diagnostics, or outage updates..."
-                value={postContent}
-                onChange={(e) => setPostContent(e.target.value)}
+        {/* ── Floating Action Button (FAB) ────────── */}
+        <div className="fixed bottom-32 right-8 z-40">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsComposerOpen(true)}
+            className="w-16 h-16 rounded-full bg-gradient-to-tr from-emerald-600 to-cyan-500 text-white flex items-center justify-center shadow-2xl shadow-emerald-500/40 border border-white/20 hover:brightness-110 transition-all"
+          >
+            <Plus size={32} />
+          </motion.button>
+        </div>
+
+        {/* ── Post Composer Modal ──────────────────── */}
+        <AnimatePresence>
+          {isComposerOpen && (
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsComposerOpen(false)}
+                className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl"
               />
-            </div>
-
-            <AnimatePresence>
-              {imagePreview && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="relative mb-6 ml-14 rounded-2xl overflow-hidden border border-white/10"
-                >
-                  <img src={imagePreview} alt="Preview" className="w-full h-auto max-h-[400px] object-cover" />
-                  <button
-                    onClick={() => setImagePreview(null)}
-                    className="absolute top-4 right-4 w-8 h-8 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-rose-500 transition-colors"
-                  >
-                    ×
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <div className="flex items-center justify-between ml-14 pt-4 border-t border-white/5">
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors font-medium text-sm"
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="relative w-full max-w-2xl panel-glass rounded-[2rem] p-1 shadow-2xl overflow-hidden"
               >
-                <ImageIcon size={18} /> Add Media
-                <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageChange} />
-              </button>
+                <div className="bg-slate-900/90 rounded-[1.8rem] p-8">
+                  <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-xl font-bold text-white flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <Plus size={18} />
+                      </div>
+                      New Log Entry
+                    </h3>
+                    <button
+                      onClick={() => setIsComposerOpen(false)}
+                      className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
 
-              <button
-                onClick={handleSubmit}
-                disabled={isSubmitting || (!postContent.trim() && !imagePreview)}
-                className="btn btn--primary px-6 py-2 rounded-xl font-bold flex items-center gap-2 group disabled:opacity-50 disabled:pointer-events-none"
-              >
-                {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <><Send size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /> Publish Feed</>}
-              </button>
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/20">
+                      <User size={24} className="text-white" />
+                    </div>
+                    <textarea
+                      autoFocus
+                      className="w-full bg-transparent border-none focus:ring-0 text-slate-100 resize-none min-h-[150px] text-xl font-medium placeholder:text-slate-700 outline-none"
+                      placeholder="What's happening on the floor?"
+                      value={postContent}
+                      onChange={(e) => setPostContent(e.target.value)}
+                    />
+                  </div>
+
+                  {imagePreview && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="relative mb-6 rounded-2xl overflow-hidden border border-white/10"
+                    >
+                      <img src={imagePreview} alt="Preview" className="w-full h-auto max-h-[300px] object-cover" />
+                      <button
+                        onClick={() => setImagePreview(null)}
+                        className="absolute top-4 right-4 w-8 h-8 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-rose-500 transition-colors"
+                      >
+                        ×
+                      </button>
+                    </motion.div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-6 border-t border-white/5">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex items-center gap-2 px-6 py-3 rounded-2xl text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all font-bold text-sm"
+                    >
+                      <ImageIcon size={20} /> Add Visual Diagnostic
+                      <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageChange} />
+                    </button>
+
+                    <button
+                      onClick={handleSubmit}
+                      disabled={isSubmitting || (!postContent.trim() && !imagePreview)}
+                      className="btn btn--primary px-8 py-3 rounded-2xl font-bold flex items-center gap-2 group disabled:opacity-50 disabled:pointer-events-none shadow-xl shadow-emerald-500/20"
+                    >
+                      {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <><Send size={18} /> Publish to Feed</>}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
             </div>
-          </div>
-        </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* ── Feed Stream ────────────────────────── */}
         <div className="space-y-8">
