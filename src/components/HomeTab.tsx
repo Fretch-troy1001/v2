@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, Image as ImageIcon, CheckCircle2, AlertTriangle, Send, Loader2, User } from 'lucide-react';
+import { Calendar, Image as ImageIcon, CheckCircle2, AlertTriangle, Send, Loader2, User, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { getDailyFeeds, createDailyFeed, uploadFeedImage, DailyFeed } from '../services/supabase';
+import { getDailyFeeds, createDailyFeed, uploadFeedImage, deleteDailyFeed, DailyFeed } from '../services/supabase';
 
 export const HomeTab: React.FC = () => {
   const [feeds, setFeeds] = useState<DailyFeed[]>([]);
@@ -73,6 +73,16 @@ export const HomeTab: React.FC = () => {
     alert('AI Sync initiated. The Assistant will now query NotebookLM to generate the latest feed update.');
     // In a real production app, this would call an API route on the proxy.
     // For now, I'll provide the UI and can manually trigger the sync as the agent.
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this log entry?')) return;
+    const success = await deleteDailyFeed(id);
+    if (success) {
+      await fetchFeeds();
+    } else {
+      alert('Failed to delete the post. Check permissions.');
+    }
   };
 
   return (
@@ -198,6 +208,13 @@ export const HomeTab: React.FC = () => {
                       </div>
                     </div>
                   </div>
+                  <button
+                    onClick={() => handleDelete(feed.id)}
+                    className="w-10 h-10 rounded-full bg-white/5 hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 transition-all flex items-center justify-center border border-white/5 hover:border-rose-500/30"
+                    title="Delete post"
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 </div>
 
                 {(feed.image_url || feed.image_base64) && (

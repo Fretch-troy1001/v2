@@ -22,7 +22,8 @@ async function startServer() {
       });
 
       // The webhook URL
-      const webhookUrl = `https://troy-n8n-2026.duckdns.org/webhook/7c3dafe5-6f48-42f3-b2b6-bbe39aae3b12?${params.toString()}`;
+      const N8N_HOST = process.env.N8N_HOST || "https://troy-n8n-2026.duckdns.org";
+      const webhookUrl = `${N8N_HOST}/webhook/7c3dafe5-6f48-42f3-b2b6-bbe39aae3b12?${params.toString()}`;
 
       const response = await fetch(webhookUrl, {
         method: "GET",
@@ -56,7 +57,8 @@ async function startServer() {
       });
 
       // The webhook URL for Valve Lock Weld
-      const webhookUrl = `https://troy-n8n-2026.duckdns.org/webhook/PlaneAandB?${params.toString()}`;
+      const N8N_HOST = process.env.N8N_HOST || "https://troy-n8n-2026.duckdns.org";
+      const webhookUrl = `${N8N_HOST}/webhook/PlaneAandB?${params.toString()}`;
 
       const response = await fetch(webhookUrl, {
         method: "GET",
@@ -90,7 +92,8 @@ async function startServer() {
       });
 
       // The webhook URL for ICV Clamping Ring
-      const webhookUrl = `https://troy-n8n-2026.duckdns.org/webhook/clamping_ring?${params.toString()}`;
+      const N8N_HOST = process.env.N8N_HOST || "https://troy-n8n-2026.duckdns.org";
+      const webhookUrl = `${N8N_HOST}/webhook/clamping_ring?${params.toString()}`;
 
       const response = await fetch(webhookUrl, {
         method: "GET",

@@ -220,3 +220,18 @@ export async function createDailyFeed(content: string, imageBase64?: string, ima
   }
 }
 
+export async function deleteDailyFeed(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('daily_feeds')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('[Supabase deleteDailyFeed]', err);
+    return false;
+  }
+}
+

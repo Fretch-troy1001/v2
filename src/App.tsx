@@ -1,12 +1,10 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HomeTab } from './components/HomeTab';
 import { ToolsTab } from './components/ToolsTab';
 import { ValveTab } from './components/ValveTab';
+import { GeneratorTab } from './components/GeneratorTab';
+import { LoginPage } from './components/LoginPage';
+import { supabase } from './services/supabase';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   LayoutDashboard,
@@ -17,18 +15,43 @@ import {
   Plus,
   ChevronRight,
   User,
-  Zap
+  Zap,
+  LogOut,
+  Cpu
 } from 'lucide-react';
+import { Session } from '@supabase/supabase-js';
 
-type Tab = 'dashboard' | 'data' | 'settings';
+type Tab = 'dashboard' | 'data' | 'generator' | 'settings';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Initial session fetch
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
 
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard': return <HomeTab />;
       case 'data': return <ValveTab />;
+      case 'generator': return <GeneratorTab />;
       case 'settings': return <ToolsTab />;
       default: return <HomeTab />;
     }
@@ -36,9 +59,23 @@ export default function App() {
 
   const tabs = [
     { id: 'dashboard', label: 'Daily Feeds', icon: LayoutDashboard },
-    { id: 'data', label: 'Interactive Diagrams', icon: Database },
+    { id: 'data', label: 'Valve Diagrams', icon: Database },
+    { id: 'generator', label: 'Generator Overview', icon: Cpu },
     { id: 'settings', label: 'Engineering Tools', icon: Settings }
   ] as const;
+
+
+  if (loading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-slate-950">
+        <Zap size={48} className="text-emerald-500 animate-pulse" />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <LoginPage />;
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-950 font-sans text-slate-100 relative">
@@ -88,15 +125,23 @@ export default function App() {
           })}
         </nav>
 
-        <div className="p-4 lg:p-6 mt-auto border-t border-white/5 w-full">
-          <button className="w-full flex items-center justify-center lg:justify-start gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors">
+        <div className="p-4 lg:p-6 mt-auto border-t border-white/5 w-full space-y-4">
+          <div className="flex items-center justify-center lg:justify-start gap-3 p-2 rounded-xl bg-white/5 border border-white/5">
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-slate-700 to-slate-600 flex items-center justify-center text-white border border-white/10 flex-shrink-0">
               <User size={18} />
             </div>
             <div className="hidden lg:flex flex-col items-start overflow-hidden">
-              <span className="text-sm font-medium text-slate-200 truncate w-full text-left">Turbine Engineer</span>
-              <span className="text-xs text-emerald-400/80 truncate w-full text-left">Unit 2 B Inspection</span>
+              <span className="text-sm font-medium text-slate-200 truncate w-full text-left">{session.user.email?.split('@')[0]}</span>
+              <span className="text-[10px] text-emerald-400/80 truncate w-full text-left uppercase tracking-tighter font-bold">Authenticated</span>
             </div>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center lg:justify-start gap-3 p-3 rounded-xl hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 transition-all group"
+          >
+            <LogOut size={18} className="group-hover:translate-x-1 transition-transform" />
+            <span className="hidden lg:block text-sm font-medium">System Logout</span>
           </button>
         </div>
       </aside>
@@ -156,3 +201,4 @@ export default function App() {
     </div>
   );
 }
+
