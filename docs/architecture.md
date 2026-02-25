@@ -11,6 +11,17 @@ The Turbine Systems Webapp is a modern, premium web application built to assist 
 *   **Database & BaaS:** Supabase (PostgreSQL)
 *   **External Automations:** n8n webhooks
 
+## Supabase Schema & Tables
+
+The following tables are central to the application's data layer:
+
+| Table Name | Description | Key Columns |
+|---|---|---|
+| `daily_feeds` | Stores engineering notes and images for the magazine view. | `id`, `content`, `image_base64`, `author`, `created_at` |
+| `turbine_ui_metadata` | Hotspot coordinates and component mappings for interactive diagrams. | `id`, `diagram_id`, `component_id`, `x_pos`, `y_pos` |
+| `valves` | Engineering specifications, tolerances, and design limits. | `id`, `component_id`, `name`, `nominal_od`, `tolerance_class` |
+| `planes` | Specific measurement locations (Plane B, C, etc.) for hardware. | `id`, `valve_id`, `plane_name`, `target_dimension` |
+
 ## Folder Structure
 
 ```text

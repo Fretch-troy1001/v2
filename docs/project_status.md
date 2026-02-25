@@ -1,4 +1,7 @@
 # Project Status
+> [!IMPORTANT]
+> **Update this file whenever resuming a project phase or shifting focus.**
+
 
 ## Project Milestones
 *   **Phase 1: Foundation (Completed)**

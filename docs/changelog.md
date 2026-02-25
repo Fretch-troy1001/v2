@@ -1,4 +1,7 @@
 # Changelog
+> [!IMPORTANT]
+> **Append new features and changes here immediately upon finishing a task or phase.**
+
 
 All notable changes to the Turbine Systems Webapp are documented in this file.
 
