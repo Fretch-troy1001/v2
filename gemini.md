@@ -37,3 +37,14 @@ In everything you do regarding turbine engineering context, documentation, daily
 - **Context Management**: To avoid bloating the context window, break large tasks into atomic steps. 
 - **Verifiable Changes**: After each logical change (e.g., updating a service), run `npm run lint` or a test script to confirm stability.
 - **Data Integrity**: Ensure field names in the database match the `ValveSpecification` and `Plane` types in `src/types.ts`.
+
+## Documentation (`docs/`)
+
+| File | What it covers |
+|---|---|
+| `docs/architecture.md` | Tech stack, folder structure, all data flows, Supabase tables |
+| `docs/project_status.md` | Milestones, what's done, what's next — **update when resuming a phase** |
+| `docs/changelog.md` | Feature history — **append here when finishing work** |
+| `docs/daily_feeds.md` | Daily Feeds: DB schema, Base64 images, RLS notes |
+| `docs/local_proxy.md` | Express proxy: CORS rationale, n8n call pattern, adding new routes |
+| `docs/interactive_diagrams.md` | Valve diagrams: coordinate system, hotspot join, adding new diagrams |
