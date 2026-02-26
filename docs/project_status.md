@@ -28,13 +28,15 @@
     *   Establish "Turbo Mode" for agentic command execution (Authorized).
     *   Deploy to Vercel with environment variable isolation.
     *   Secure Backend-for-Frontend (BFF) proxying to hide webhooks.
+    *   **Context Formalization**: Migrated `gemini.md` to system-integrated `.agents/workflows`.
 
 ## What Has Been Accomplished So Far?
 *   **UI/UX:** Created a very premium, high-production-value dashboard utilizing React and Framer Motion.
-*   **Production Deployment:** Successfully hosted the app on Vercel with full security hardening (BFF proxy).
 *   **Authentication:** Fully integrated Supabase Auth with auto-confirmed accounts and public/secret key isolation.
+*   **Data Integrity:** Implemented a UI-integrated **Schema Health Check** to alert and guide users when database columns are missing.
+*   **Editing Suite:** Added full CRUD capabilities for the Daily Feeds with date, type, and event management.
 
 ## What Is Next?
 1.  **Generator/Boiler Expansion**: Add the high-detail diagrams for the rest of the turbine train.
 2.  **AI Sync Verification**: Test the full loop from NotebookLM update -> AI Summary -> Daily Feed.
-3.  **Storage Migration**: Move legacy Base64 images to Supabase Storage buckets.
+3.  **Real-Time Collaborative Editing**: Implement Supabase Realtime for live feed updates.

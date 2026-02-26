@@ -1,16 +1,31 @@
--- Paste this into your Supabase SQL Editor to create the daily_feeds table
+-- Paste this into your Supabase SQL Editor to create or update the daily_feeds table
+
+-- 1. Create the table if it doesn't exist
 CREATE TABLE IF NOT EXISTS daily_feeds (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     content TEXT NOT NULL,
     image_base64 TEXT,
-    author VARCHAR(255) DEFAULT 'Turbine Engineer',
+    author VARCHAR(255) DEFAULT 'Guest Engineer',
+    post_type TEXT DEFAULT 'professional',
+    event TEXT DEFAULT 'B Inspection',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Note: Because we are inserting Base64 data directly into a text column, 
--- and not using Supabase Storage, we don't need to configure RLS storage policies.
--- Let's ensure RLS is disabled on the table to make it easy for our app to read/write using anon key.
-ALTER TABLE daily_feeds DISABLE ROW LEVEL SECURITY;
+-- 2. Add missing columns for existing tables (MIGRATION)
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='daily_feeds' AND column_name='post_type') THEN
+        ALTER TABLE daily_feeds ADD COLUMN post_type TEXT DEFAULT 'professional';
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='daily_feeds' AND column_name='event') THEN
+        ALTER TABLE daily_feeds ADD COLUMN event TEXT DEFAULT 'B Inspection';
+    END IF;
 
--- Add image_url column for Supabase Storage support
-ALTER TABLE daily_feeds ADD COLUMN IF NOT EXISTS image_url TEXT;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='daily_feeds' AND column_name='image_url') THEN
+        ALTER TABLE daily_feeds ADD COLUMN image_url TEXT;
+    END IF;
+END $$;
+
+-- 3. Security (Disable RLS for this internal tool)
+ALTER TABLE daily_feeds DISABLE ROW LEVEL SECURITY;

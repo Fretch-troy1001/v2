@@ -4,9 +4,29 @@
 
 ---
 
+## [2026-02-26] Daily Feeds UI/UX Overhaul
+
+### Added
+- **Top Bar Filter System**: Sticky navigation bar with "Post Type" (Professional/Social) and "Event" filters in a compact, single-line layout.
+- **Daily Navigation**: Left/Right day-swapping controls supported by **ArrowLeft** and **ArrowRight** keyboard shortcuts.
+- **Full Post Editing**: Added the ability to modify existing feeds (text, type, event, date, and image).
+- **Security Proxies**: Secured n8n webhooks in `/api/index.ts`, removing frontend exposure of raw URLs.
+- **Image Optimization**: Client-side resizing (1200px) and JPEG compression (0.6) logic in `HomeTab.tsx`.
+
+### Changed
+- **Feed Layout Swap**: Modified the visual hierarchy to display captions *above* images for technical scannability.
+- **Premium Styling**: Refined glassmorphism and motion transitions for feed entries.
+
+### Fixed
+- Resolved image upload resolution issues by implementing canvas-based resizing.
+
+---
+
 ## [Unreleased / Current]
 
 ### Added
+- **GEMINI context migration** — Formalized project directives from `gemini.md` into system-integrated Workflows (`.agents/workflows/`).
+- **Learning Log Workflow** — Automated the "Snag/Solution" logging process via dedicated workspace workflows.
 - **Daily Feeds System** — Implemented a glossy, magazine-style Daily Feeds dashboard replacing the older layout. Includes a rich post composer allowing text input and Base64 image attachment.
 - **Production Deployment** — Successfully deployed the app to Vercel with environment variable protection and secure API proxying.
 - **Authentication & Security** — Integrated Supabase Auth with public/secret key isolation. Implemented auto-confirmed engineer accounts.

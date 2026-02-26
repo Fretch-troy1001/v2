@@ -153,6 +153,8 @@ export interface DailyFeed {
   image_url: string | null;
   author: string;
   created_at: string;
+  post_type: 'professional' | 'social';
+  event: string;
 }
 
 export async function getDailyFeeds(): Promise<DailyFeed[]> {
@@ -167,6 +169,25 @@ export async function getDailyFeeds(): Promise<DailyFeed[]> {
   } catch (err) {
     console.error('[Supabase getDailyFeeds]', err);
     return [];
+  }
+}
+
+export async function checkSchema(): Promise<{ ok: boolean; missing: string[] }> {
+  try {
+    const { data, error } = await supabase
+      .from('daily_feeds')
+      .select('post_type, event')
+      .limit(1);
+
+    if (error) {
+      const missing: string[] = [];
+      if (error.message.includes('post_type')) missing.push('post_type');
+      if (error.message.includes('event')) missing.push('event');
+      return { ok: false, missing };
+    }
+    return { ok: true, missing: [] };
+  } catch (err) {
+    return { ok: false, missing: ['unknown'] };
   }
 }
 
@@ -196,21 +217,34 @@ export async function uploadFeedImage(file: File): Promise<string | null> {
   }
 }
 
-export async function createDailyFeed(content: string, imageBase64?: string, imageUrl?: string): Promise<boolean> {
+export async function createDailyFeed(
+  content: string,
+  imageBase64?: string,
+  imageUrl?: string,
+  postType: 'professional' | 'social' = 'professional',
+  event: string = 'B Inspection',
+  customDate?: Date
+): Promise<boolean> {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     const author = session?.user?.email || 'Guest Engineer';
 
+    const insertData: any = {
+      content,
+      image_base64: imageBase64 || null,
+      image_url: imageUrl || null,
+      author,
+      post_type: postType,
+      event: event
+    };
+
+    if (customDate) {
+      insertData.created_at = customDate.toISOString();
+    }
+
     const { error } = await supabase
       .from('daily_feeds')
-      .insert([
-        {
-          content,
-          image_base64: imageBase64 || null,
-          image_url: imageUrl || null,
-          author
-        }
-      ]);
+      .insert([insertData]);
 
     if (error) throw error;
     return true;
@@ -231,6 +265,29 @@ export async function deleteDailyFeed(id: string): Promise<boolean> {
     return true;
   } catch (err) {
     console.error('[Supabase deleteDailyFeed]', err);
+    return false;
+  }
+}
+export async function updateDailyFeed(
+  id: string,
+  updates: Partial<DailyFeed>,
+  customDate?: Date
+): Promise<boolean> {
+  try {
+    const updateData: any = { ...updates };
+    if (customDate) {
+      updateData.created_at = customDate.toISOString();
+    }
+
+    const { error } = await supabase
+      .from('daily_feeds')
+      .update(updateData)
+      .eq('id', id);
+
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('[Supabase updateDailyFeed]', err);
     return false;
   }
 }
